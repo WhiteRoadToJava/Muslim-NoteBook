@@ -82,3 +82,25 @@ export const resetZikrCount = async (id) => {
   await saveZikrs(updated);
   return updated;
 };
+
+export const getStreak = (zikrs) => {
+  const {history, target} = zikrs;
+  let streak = 0;
+  let date = new Date();
+
+const todayKey = date.toISOString().split("T")[0];
+  if(!history[todayKey] || history[target] < target) {
+    date.setDate(date.getDate() - 1);
+  }
+
+  while( true){
+    const key = date.toISOString().split("T")[0];
+    if(history[key] && history[key] >= target){
+      streak += 1;
+      date.setDate(date.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
