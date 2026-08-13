@@ -1,12 +1,32 @@
 import { StyleSheet } from "react-native";
-import { SafeAreaView, Text, FlatList, View, TouchableOpacity, Modal, Alert, TextInput, Button} from "react-native";
+import {
+  SafeAreaView,
+  Text,
+  FlatList,
+  View,
+  TouchableOpacity,
+  Alert,
+
+} from "react-native";
 import { useState, useEffect } from "react";
-import { loadZikrs, incrementZikr, addZikr, updateZikr, deleteZikr} from "../storage";
+import {
+  loadZikrs,
+  incrementZikr,
+  addZikr,
+  updateZikr,
+  deleteZikr,
+} from "../storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AddModal from "../components/AddModal.jsx";
 
 export default function HomeScreen() {
   const [zikrs, setZikrs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [modalVisible, setModalVisible] = useState(true);
+  const [editingZikr, setEditingZikr] = useState(null);
+  const [nameInput, setNameInput] = useState("");
+  const [targetInput, setTargetInput] = useState("");
 
   const refresh = async () => {
     const data = await loadZikrs();
@@ -32,6 +52,66 @@ export default function HomeScreen() {
     const updated = await incrementZikr(id);
     setZikrs(updated);
   };
+  const openAddModal = () => {
+    setEditingZikr(null);
+    setNameInput("");
+    setTargetInput("");
+    setModalVisible(true);
+  };
+
+  const openEditModal = (zikr) => {
+    setEditingZikr(zikr);
+    setNameInput(zikr.name);
+    setTargetInput(zikr.target.toString());
+    setModalVisible(true);
+  };
+
+  const handleSave = async () => {
+    const trimedName = nameInput.trim();
+    const parsedTarget = parseInt(targetInput);
+
+    if (!trimedName) {
+      Alert.alert("Name required", "Please enter a name for the zikr.");
+      return;
+    }
+    if (!parsedTarget || parsedTarget <= 0) {
+      Alert.alert(
+        "Target required",
+        "Please enter a valid target for the zikr.",
+      );
+      return;
+    }
+    let updated;
+    if (editingZikr) {
+      updated = await updateZikr(editingZikr.id, {
+        name: trimedName,
+        target: parsedTarget,
+      });
+    } else {
+      updated = await addZikr(trimedName, parsedTarget);
+    }
+    setZikrs(updated);
+    setModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (!editingZikr) return;
+    Alert.alert("Delet Zilr", "Are you sure you want to delete this zikr?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const updated = await deleteZikr(editingZikr.id);
+          setZikrs(updated);
+          setModalVisible(false);
+        },
+      },
+    ]);
+  };
 
   const renderItem = ({ item }) => {
     const progress = Math.min(item.count / item.target, 1);
@@ -46,7 +126,9 @@ export default function HomeScreen() {
           {item.count} / {item.target}
         </Text>
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+          <View
+            style={[styles.progressFill, { width: `${progress * 100}%` }]}
+          />
         </View>
       </TouchableOpacity>
     );
@@ -69,7 +151,17 @@ export default function HomeScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
       />
-    </SafeAreaView>
+      <AddModal
+        visible={modalVisible}
+        editingZikr={editingZikr}
+        nameInput={nameInput}
+        targetInput={targetInput}
+        setNameInput={setNameInput}       
+        setTargetInput={setTargetInput}   
+        onClose={() => setModalVisible(false)} 
+        handleSave={handleSave}
+        handleDelete={handleDelete}
+      />    </SafeAreaView>
   );
 }
 
