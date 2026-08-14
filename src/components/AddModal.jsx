@@ -3,13 +3,13 @@ import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native";
 
 const AddModal = ({
-    visible,
+  visible,
   editingZikr,
   nameInput,
   targetInput,
-  setNameInput,   // was: called nameInput(text) directly
+  setNameInput, // was: called nameInput(text) directly
   setTargetInput, // was: called targetInput(text) directly
-  onClose,        // was: called visible(false) directly
+  onClose, // was: called visible(false) directly
   handleSave,
   handleDelete,
 }) => {
@@ -23,7 +23,9 @@ const AddModal = ({
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalOverlay}>
         <View style={styles.modalBox}>
-          <Text style={styles.title}>{editingZikr ? "Edit Zikr" : "Add Zikr"}</Text>
+          <Text style={styles.title}>
+            {editingZikr ? "Edit Zikr" : "Add Zikr"}
+          </Text>
           <TextInput
             style={styles.input}
             placeholder="Zikr name"
@@ -37,13 +39,14 @@ const AddModal = ({
             onChangeText={setTargetInput}
           />
           <View style={styles.modalButtons}>
-            <TouchableOpacity
-            style={styles.canselButton}
-              onPress={onClose}>
+            <TouchableOpacity style={styles.canselButton} onPress={onClose}>
               <Text>Cansel</Text>
             </TouchableOpacity>
             {editingZikr && (
-              <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={handleDelete}
+              >
                 <Text>Delete</Text>
               </TouchableOpacity>
             )}
@@ -60,7 +63,7 @@ const AddModal = ({
 export default AddModal;
 
 const styles = StyleSheet.create({
-    modalOverlay: {
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -107,7 +110,3 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
-
-
-
-
