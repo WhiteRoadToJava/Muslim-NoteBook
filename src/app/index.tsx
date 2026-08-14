@@ -6,7 +6,6 @@ import {
   View,
   TouchableOpacity,
   Alert,
-
 } from "react-native";
 import { useState, useEffect } from "react";
 import {
@@ -15,7 +14,8 @@ import {
   addZikr,
   updateZikr,
   deleteZikr,
-} from "../storage";
+  getStreak,
+} from "../actions/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddModal from "../components/AddModal.jsx";
 
@@ -116,13 +116,19 @@ export default function HomeScreen() {
   const renderItem = ({ item }) => {
     const progress = Math.min(item.count / item.target, 1);
     const done = item.count >= item.target;
+    const streak = getStreak(item);
+
     return (
       <TouchableOpacity
         style={[styles.card, done && styles.cardDone]}
         onPress={() => handleTap(item.id)}
+        onLongPress={() => openEditModal(item)}
       >
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.count}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.name}>{item.name}</Text>
+          {streak > 0 && <Text style={styles.streak}>Streak 🔥: {streak}</Text>}
+        </View>
+        <Text>
           {item.count} / {item.target}
         </Text>
         <View style={styles.progressTrack}>
@@ -156,12 +162,13 @@ export default function HomeScreen() {
         editingZikr={editingZikr}
         nameInput={nameInput}
         targetInput={targetInput}
-        setNameInput={setNameInput}       
-        setTargetInput={setTargetInput}   
-        onClose={() => setModalVisible(false)} 
+        setNameInput={setNameInput}
+        setTargetInput={setTargetInput}
+        onClose={() => setModalVisible(false)}
         handleSave={handleSave}
         handleDelete={handleDelete}
-      />    </SafeAreaView>
+      />
+    </SafeAreaView>
   );
 }
 
@@ -202,6 +209,12 @@ const styles = StyleSheet.create({
     color: "#555",
     marginBottom: 10,
   },
+  streak: {
+    fontSize: 16,
+    color: "#e07b00",
+    fontWeight: "600",
+  },
+
   progressTrack: {
     height: 8,
     backgroundColor: "#eee",
